@@ -1,0 +1,89 @@
+<html>
+   <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+      <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" media="screen">
+      <script type = "text/javascript" src = "https://d3js.org/d3.v4.min.js"></script>
+      <style>
+        .bar-chart {background-color: cyan;}
+        svg rect {
+              fill: grey;
+            }
+
+        svg text {
+            fill: blue;
+            font: 12px sans-serif;
+            text-anchor: end;
+              }
+      </style>
+
+   </head>
+   <body>
+     <div class='container'>
+        <div class="page-header">
+            <h1>Graphical Output</h1>
+        </div>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script> var data = [];  </script>
+        {% for i in readings %}
+          {% if i[1] <= to and i[1] >= frm %}
+          <script>
+              data.push({{ i[0] }});
+          </script>
+          {% endif %}
+        {% endfor %}
+        <script>
+        if (data.length == 0) {
+            document.write('No data entries from {{ frm }} to {{ to }}');  }
+        else {
+            document.write('Temparature Readings from {{ frm }} to {{ to }}');
+          var margin = {left: 150, top: 10};
+          var barWidth = 30;
+          var barPadding = 20;
+          var svgHeight = 260;
+          var svgWidth = (barWidth+barPadding) * data.length + 50;
+
+          var chart = d3.select('body')
+            .append('svg')
+            .attr("width", svgWidth)
+            .attr("height", svgHeight)
+
+            .attr("transform", 'translate('+margin.left+','+margin.top+')');
+
+           var yscale = d3.scaleLinear()
+            .domain([0, svgHeight-20])
+            .range([svgHeight-20, 0]);
+
+          var y_axis = d3.axisLeft()
+            .scale(yscale);
+
+          var bar = chart.selectAll("g")
+              .data(data)
+              .enter()
+              .append("g")
+              .attr("transform", function (d, i) {
+                              return "translate("+ (50+(barWidth+barPadding)* i) +")";
+                            } )
+              .attr("y", function(d) { return (svgHeight-10 - d); });
+
+          bar.append("rect")
+              .attr("height", function(d) { return d; })
+              .attr("width", barWidth)
+              .attr("y", function(d) { return (svgHeight-10 - d); });
+
+          bar.append("text")
+              .attr("y", function(d) { return (svgHeight-10 - d); } )
+              .attr("x", barWidth/2 )
+              .attr("dy", "0.85em")
+              .attr("dx", ".75em")
+              .text(function(d) { return d; });
+
+         chart.append("g")
+            .attr("transform", "translate(40, 10)")
+            .call(y_axis);
+        }
+         </script>
+    </div>
+ </body>
+</html>
